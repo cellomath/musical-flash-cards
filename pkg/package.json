@@ -1,0 +1,12 @@
+{
+  "name": "musical_flash_cards",
+  "version": "0.1.0",
+  "files": [
+    "musical_flash_cards_bg.wasm",
+    "musical_flash_cards.js",
+    "musical_flash_cards.d.ts"
+  ],
+  "module": "musical_flash_cards.js",
+  "types": "musical_flash_cards.d.ts",
+  "sideEffects": false
+}

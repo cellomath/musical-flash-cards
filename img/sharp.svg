@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   version="1.1"
+   id="sharp"
+   width="9"
+   height="31"
+   viewBox="0 0 9 31"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <path
+     style="fill:#000000;fill-opacity:1"
+     d="m 9,10 -9,3 v -3 l 9,-3 m -3,-7 h 1 v 29 h -1 m -4,-28 h 1 v 30 h -1 m 7,-11 -9,3 v -3 l 9,-3"/>
+</svg>
