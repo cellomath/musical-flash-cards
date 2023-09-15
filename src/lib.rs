@@ -141,15 +141,16 @@ pub fn main() {
     console_error_panic_hook::set_once();
     let document = web_sys::window().unwrap().document().unwrap();
 
-    use rand::seq::SliceRandom;
     use rand::thread_rng;
-    let mut rng = Rc::new(RefCell::new(thread_rng()));
+    let rng = Rc::new(RefCell::new(thread_rng()));
 
     let current_settings = Rc::new(RefCell::new(CelloCardGenerator::no_sharps_flats()));
-    let mut cards = current_settings.borrow().card_generator();
-    cards.shuffle(&mut *rng.borrow_mut());
-    let cards: Rc<RefCell<Box<[Card]>>> = Rc::new(RefCell::new(cards));
+
+
+    let cards = current_settings.borrow().card_generator(&mut *rng.borrow_mut());
+    let cards: Rc<RefCell<Vec<Card>>> = Rc::new(RefCell::new(cards));
     let card_index = Rc::new(Cell::new(0usize));
+
     {
         let cards = cards.borrow();
         if let Some(card) = cards.get(card_index.get()) {
@@ -357,8 +358,7 @@ pub fn main() {
                     }
                     let new_settings = CelloCardGenerator::read_settings();
                     if &new_settings != &*current_settings.borrow() {
-                        let mut new_cards = new_settings.card_generator();
-                        new_cards.shuffle(&mut *rng.borrow_mut());
+                        let new_cards = new_settings.card_generator(&mut *rng.borrow_mut());
                         let card: Element = new_cards.get(0).map(|c|c.into()).unwrap_or_else(|| status_card("Looks like there's no cards in this deck! <br> Try adjusting some options or using a preset."));
                         cards.replace(new_cards);
                         card_index.set(0);
@@ -376,56 +376,6 @@ pub fn main() {
                                 card_index.get() + 1,
                                 cards.borrow().len()
                             ));
-                        div.replace_children_with_node_1(&card);
-
-                        current_settings.replace(new_settings);
-                    }
-                }
-            }
-        });
-        menu_icon
-            .add_event_listener_with_callback("mouseup", closure.as_ref().unchecked_ref())
-            .unwrap();
-        closure.forget();
-    }
-
-    {
-        let menu_toggled = Rc::clone(&menu_toggled);
-        let menu_pressed = Rc::clone(&menu_pressed);
-        let closure = Closure::<dyn FnMut(_)>::new(move |_event: web_sys::MouseEvent| {
-            if menu_pressed.get() {
-                menu_pressed.set(false);
-                menu_toggled.set(!menu_toggled.get());
-
-                let document = web_sys::window().unwrap().document().unwrap();
-                let full_screen_menu = document
-                    .get_element_by_id("full-screen-menu")
-                    .unwrap()
-                    .dyn_into::<HtmlElement>()
-                    .unwrap();
-                if menu_toggled.get() {
-                    for name in ["right", "bottom"] {
-                        full_screen_menu.style().set_property(name, "0").unwrap();
-                    }
-                    current_settings.borrow().write_settings();
-                } else {
-                    log("updated settings");
-                    for (name, value) in [("right", "100%"), ("bottom", "100%")] {
-                        full_screen_menu.style().set_property(name, value).unwrap();
-                    }
-                    let new_settings = CelloCardGenerator::read_settings();
-                    if &new_settings != &*current_settings.borrow() {
-                        let mut new_cards = new_settings.card_generator();
-                        new_cards.shuffle(&mut *rng.borrow_mut());
-                        let card: Element = new_cards.get(0).map(|c|c.into()).unwrap_or_else(|| status_card("Looks like there's no cards in this deck! <br> Try adjusting some options or using a preset."));
-                        cards.replace(new_cards);
-                        card_index.set(0);
-                        card.set_id("card");
-                        let document = web_sys::window().unwrap().document().unwrap();
-                        let div = document
-                            .get_elements_by_class_name("main")
-                            .get_with_index(0)
-                            .unwrap();
                         div.replace_children_with_node_1(&card);
 
                         current_settings.replace(new_settings);

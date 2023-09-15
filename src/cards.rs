@@ -1,9 +1,9 @@
-use js_sys::Generator;
 use rand::prelude::SliceRandom;
-use std::cell::RefCell;
 use rand::{thread_rng, Rng};
+use std::cell::RefCell;
+use std::num::NonZeroUsize;
 use wasm_bindgen::prelude::*;
-use web_sys::{HtmlInputElement, SvgsvgElement, Element};
+use web_sys::{Element, HtmlInputElement, SvgsvgElement};
 
 use crate::SVG_NAMESPACE;
 
@@ -29,13 +29,13 @@ impl FromStr for Card {
     }
 }
 
-pub fn status_card(source: &str) -> Element{
+pub fn status_card(source: &str) -> Element {
     let document = web_sys::window().unwrap().document().unwrap();
-    let card: Element = document
-        .create_element("div").unwrap();
+    let card: Element = document.create_element("div").unwrap();
     card.set_attribute("width", "100%").unwrap();
     card.set_attribute("height", "100%").unwrap();
-    card.set_attribute("style", "font-size: 24px; text-align: center;").unwrap();
+    card.set_attribute("style", "font-size: 24px; text-align: center;")
+        .unwrap();
     card.set_inner_html(source);
     card
 }
@@ -71,22 +71,22 @@ impl From<&Card> for Element {
             Clef::Treble => {
                 clef.set_attribute("x", "10").unwrap();
                 clef.set_attribute("y", "70").unwrap();
-                clef.set_attribute("href", "/img/treble_clef.svg").unwrap();
+                clef.set_attribute("href", "./img/treble_clef.svg").unwrap();
             }
             Clef::Alto => {
                 clef.set_attribute("x", "10").unwrap();
                 clef.set_attribute("y", "80").unwrap();
-                clef.set_attribute("href", "/img/tenor_clef.svg").unwrap();
+                clef.set_attribute("href", "./img/tenor_clef.svg").unwrap();
             }
             Clef::Tenor => {
                 clef.set_attribute("x", "10").unwrap();
                 clef.set_attribute("y", "70").unwrap();
-                clef.set_attribute("href", "/img/tenor_clef.svg").unwrap();
+                clef.set_attribute("href", "./img/tenor_clef.svg").unwrap();
             }
             Clef::Bass => {
                 clef.set_attribute("x", "10").unwrap();
                 clef.set_attribute("y", "80").unwrap();
-                clef.set_attribute("href", "/img/bass_clef.svg").unwrap();
+                clef.set_attribute("href", "./img/bass_clef.svg").unwrap();
             }
         }
         card_svg.append_child(&clef).unwrap();
@@ -223,6 +223,7 @@ pub struct CelloCardGenerator {
     max_flats: u8,
     shuffled_order: bool,
     string_count: u8,
+    max_card_count: Option<NonZeroUsize>
 }
 
 impl CelloCardGenerator {
@@ -265,6 +266,7 @@ impl CelloCardGenerator {
             max_flats: 0,
             shuffled_order: false,
             string_count: 1,
+            max_card_count: NonZeroUsize::new(100)
         }
     }
 
@@ -308,8 +310,18 @@ impl CelloCardGenerator {
         let mut gen = CelloCardGenerator::no_sharps_flats();
         gen.bass_clef = None;
         gen.tenor_clef = Some(
-            Note{letter: Letter::C, octave: 3, accidental: None}.midi()..=
-            Note{letter: Letter::C, octave: 5, accidental: None}.midi());
+            Note {
+                letter: Letter::C,
+                octave: 3,
+                accidental: None,
+            }
+            .midi()..=Note {
+                letter: Letter::C,
+                octave: 5,
+                accidental: None,
+            }
+            .midi(),
+        );
         gen
     }
 
@@ -317,8 +329,18 @@ impl CelloCardGenerator {
         let mut gen = CelloCardGenerator::three_sharps();
         gen.bass_clef = None;
         gen.tenor_clef = Some(
-            Note{letter: Letter::C, octave: 3, accidental: None}.midi()..=
-            Note{letter: Letter::C, octave: 5, accidental: None}.midi());
+            Note {
+                letter: Letter::C,
+                octave: 3,
+                accidental: None,
+            }
+            .midi()..=Note {
+                letter: Letter::C,
+                octave: 5,
+                accidental: None,
+            }
+            .midi(),
+        );
         gen
     }
 
@@ -326,8 +348,18 @@ impl CelloCardGenerator {
         let mut gen = CelloCardGenerator::no_sharps_flats();
         gen.bass_clef = None;
         gen.treble_clef = Some(
-            Note{letter: Letter::G, octave: 3, accidental: None}.midi()..=
-            Note{letter: Letter::C, octave: 5, accidental: None}.midi());
+            Note {
+                letter: Letter::G,
+                octave: 3,
+                accidental: None,
+            }
+            .midi()..=Note {
+                letter: Letter::C,
+                octave: 5,
+                accidental: None,
+            }
+            .midi(),
+        );
         gen
     }
 
@@ -335,19 +367,49 @@ impl CelloCardGenerator {
         let mut gen = CelloCardGenerator::three_sharps();
         gen.bass_clef = None;
         gen.treble_clef = Some(
-            Note{letter: Letter::G, octave: 3, accidental: None}.midi()..=
-            Note{letter: Letter::C, octave: 5, accidental: None}.midi());
+            Note {
+                letter: Letter::G,
+                octave: 3,
+                accidental: None,
+            }
+            .midi()..=Note {
+                letter: Letter::C,
+                octave: 5,
+                accidental: None,
+            }
+            .midi(),
+        );
         gen
     }
 
     pub const fn advanced() -> Self {
         let mut gen = CelloCardGenerator::three_sharps();
         gen.tenor_clef = Some(
-            Note{letter: Letter::G, octave: 3, accidental: None}.midi()..=
-            Note{letter: Letter::C, octave: 3, accidental: None}.midi());
+            Note {
+                letter: Letter::G,
+                octave: 3,
+                accidental: None,
+            }
+            .midi()..=Note {
+                letter: Letter::C,
+                octave: 3,
+                accidental: None,
+            }
+            .midi(),
+        );
         gen.treble_clef = Some(
-            Note{letter: Letter::G, octave: 3, accidental: None}.midi()..=
-            Note{letter: Letter::C, octave: 5, accidental: None}.midi());
+            Note {
+                letter: Letter::G,
+                octave: 3,
+                accidental: None,
+            }
+            .midi()..=Note {
+                letter: Letter::C,
+                octave: 5,
+                accidental: None,
+            }
+            .midi(),
+        );
         gen.max_double_accidentals = 1;
         gen.shuffled_order = true;
         gen.string_count = 2;
@@ -430,6 +492,7 @@ impl CelloCardGenerator {
             max_flats: 3,
             shuffled_order: true,
             string_count: 4,
+            max_card_count: None
         }
     }
 
@@ -447,20 +510,21 @@ impl CelloCardGenerator {
         let finger_pattern_34_allowed = element("finger_pattern_34_allowed").checked();
         let finger_pattern_5_allowed = element("finger_pattern_5_allowed").checked();
 
-        macro_rules! range{
-            ($id:literal) => {
-                {
-                    let min = element(concat!($id,"_clef_min")).value();
-                    let max = element(concat!($id,"_clef_max")).value();
-                    min.parse::<u8>().ok()
+        macro_rules! range {
+            ($id:literal) => {{
+                let min = element(concat!($id, "_clef_min")).value();
+                let max = element(concat!($id, "_clef_max")).value();
+                min.parse::<u8>()
+                    .ok()
                     .or(min.parse::<Note>().ok().map(|n| n.midi()))
-                    .map(|min|
-                        max.parse::<u8>().ok()
-                        .or(max.parse::<Note>().ok().map(|n| n.midi()))
-                        .map(|max| min..=max)
-                    ).flatten()
-                }
-            }
+                    .map(|min| {
+                        max.parse::<u8>()
+                            .ok()
+                            .or(max.parse::<Note>().ok().map(|n| n.midi()))
+                            .map(|max| min..=max)
+                    })
+                    .flatten()
+            }};
         }
         let bass_clef = range!("bass");
         let tenor_clef = range!("tenor");
@@ -489,6 +553,7 @@ impl CelloCardGenerator {
 
         let shuffled_order = element("shuffled_order").checked();
         let string_count = element("string_count").value().parse().unwrap_or(0);
+        let max_card_count = element("max_card_count").value().parse::<NonZeroUsize>().ok();
 
         CelloCardGenerator {
             finger_pattern_1_allowed,
@@ -516,10 +581,11 @@ impl CelloCardGenerator {
             max_flats,
             shuffled_order,
             string_count,
+            max_card_count
         }
     }
 
-    pub fn write_settings(&self){
+    pub fn write_settings(&self) {
         let CelloCardGenerator {
             finger_pattern_1_allowed,
             finger_pattern_2_allowed,
@@ -545,7 +611,9 @@ impl CelloCardGenerator {
             max_sharps,
             max_flats,
             shuffled_order,
-            string_count } = self.clone();
+            string_count,
+            max_card_count
+        } = self.clone();
         let document = web_sys::window().unwrap().document().unwrap();
         let element = |element_id| {
             document
@@ -611,9 +679,14 @@ impl CelloCardGenerator {
 
         element("shuffled_order").set_checked(shuffled_order);
         element("string_count").set_value(&string_count.to_string());
+
+        match max_card_count {
+            Some(x) => element("max_card_count").set_value(&x.to_string()),
+            None => element("max_card_count").set_value(""),
+        }
     }
 
-    pub fn card_generator(&self) -> Box<[Card]> {
+    pub fn card_generator<R: Rng + ?Sized>(&self, rng: &mut R) -> Vec<Card> {
         let mut finger_patterns = Vec::with_capacity(4);
         if self.finger_pattern_1_allowed {
             finger_patterns.push([
@@ -679,11 +752,30 @@ impl CelloCardGenerator {
             treble_clef: _,
             alto_clef: _,
             shuffled_order,
-            string_count
+            string_count,
+            max_card_count
         } = self.clone();
-        let rng = RefCell::new(thread_rng());
-        let offsets = [Interval{interval: 1, quality: IntervalQuality::Perfect}, Interval{interval: 5, quality: IntervalQuality::Perfect}, Interval{interval: 9, quality: IntervalQuality::Major}, Interval{interval: 13, quality: IntervalQuality::Major}];
-        (0..=255/*C#2 to A4*/)
+        let offsets = [
+            Interval {
+                interval: 1,
+                quality: IntervalQuality::Perfect,
+            },
+            Interval {
+                interval: 5,
+                quality: IntervalQuality::Perfect,
+            },
+            Interval {
+                interval: 9,
+                quality: IntervalQuality::Major,
+            },
+            Interval {
+                interval: 13,
+                quality: IntervalQuality::Major,
+            },
+        ];
+        let rng = RefCell::new(rng);
+        let mut cards: Vec<_> =
+            (0..=255/*C#2 to A4*/)
             .flat_map(|start_note_midi| {
                 let finger_patterns_ref = &finger_patterns;
                 Note::from_midi(start_note_midi)
@@ -951,18 +1043,23 @@ impl CelloCardGenerator {
                     })
             })
             .flat_map(|notes| {
-                let rng_ref = &rng;
+                let rng = &rng;
                 clefs.iter().filter_map(move |(clef, range)| {
-                    let mut rng = rng_ref.borrow_mut();
                     let notes = match (shuffled_order, string_count) {
-                        (false,0) => notes,
+                        (false, 0) => notes,
                         (true, _) => {
-                            let mut notes = notes.map(|n: Note| n.add(offsets[rng.gen_range(0..string_count) as usize]).unwrap_or(n));
-                            notes.shuffle(rng.deref_mut());
+                            let mut notes = notes.map(|n: Note| {
+                                n.add(offsets[rng.borrow_mut().gen_range(0..string_count) as usize])
+                                    .unwrap_or(n)
+                            });
+                            notes.shuffle(&mut*rng.borrow_mut());
                             notes
-                        },
-                        (false,_) => {
-                            let mut notes = notes.map(|n: Note| n.add(offsets[rng.gen_range(0..string_count) as usize]).unwrap_or(n));
+                        }
+                        (false, _) => {
+                            let mut notes = notes.map(|n: Note| {
+                                n.add(offsets[rng.borrow_mut().gen_range(0..string_count) as usize])
+                                    .unwrap_or(n)
+                            });
                             notes.sort_by_key(|n| n.midi());
                             notes
                         }
@@ -976,14 +1073,20 @@ impl CelloCardGenerator {
                     None
                 })
             })
-            .collect()
+            .collect();
+        cards.shuffle(rng.into_inner());
+        if let Some(x) = max_card_count{
+            cards.truncate(x.get());
+        }
+        cards
     }
 }
 #[cfg(test)]
 #[test]
 fn cello_card_generator() {
+    let mut rng = thread_rng();
     CelloCardGenerator::no_sharps_flats()
-        .card_generator()
+        .card_generator(&mut rng)
         .into_iter()
         .for_each(|c| {
             println!("{c:?}");
@@ -1003,7 +1106,7 @@ enum Letter {
 
 impl From<Letter> for char {
     #[inline]
-    fn from(letter: Letter) -> Self{
+    fn from(letter: Letter) -> Self {
         use Letter as L;
         match letter {
             L::A => 'A',
@@ -1012,7 +1115,7 @@ impl From<Letter> for char {
             L::D => 'D',
             L::E => 'E',
             L::F => 'F',
-            L::G => 'G'
+            L::G => 'G',
         }
     }
 }
@@ -1117,10 +1220,10 @@ impl TryFrom<i8> for Accidental {
     }
 }
 
-impl Accidental{
-    fn to_str(self) -> &'static str{
+impl Accidental {
+    fn to_str(self) -> &'static str {
         use Accidental as A;
-        match self{
+        match self {
             A::DoubleFlat => "bb",
             A::Flat => "b",
             A::Natural => "",
@@ -1189,17 +1292,15 @@ impl FromStr for Note {
 }
 
 impl ToString for Note {
-    fn to_string(&self) -> String{
+    fn to_string(&self) -> String {
         let l: char = self.letter.into();
-        if let Some(a) = self.accidental{
-            format!("{}{}{}",l,a.to_str(),self.octave)
-        }
-        else {
-            format!("{}{}",l,self.octave)
+        if let Some(a) = self.accidental {
+            format!("{}{}{}", l, a.to_str(), self.octave)
+        } else {
+            format!("{}{}", l, self.octave)
         }
     }
 }
-
 
 impl Note {
     /// How far up the staff do you have to go to get to the other note?
@@ -1220,11 +1321,13 @@ impl Note {
             L::G => 7,
             L::A => 9,
             L::B => 11,
-        }.wrapping_add(if let Some(accidental) = self.accidental {
+        }
+        .wrapping_add(if let Some(accidental) = self.accidental {
             accidental as i8
         } else {
             0
-        }) as u8).wrapping_add(12 * (self.octave.wrapping_add(1)));
+        }) as u8)
+            .wrapping_add(12u8.wrapping_mul(self.octave.wrapping_add(1)));
     }
 
     pub fn from_midi(midi: u8) -> Note {
@@ -1287,7 +1390,7 @@ impl Note {
             _ => {
                 println!("{self:?} has no enharmonic_equivalent {letter:?} (adjustmnet {adjustment} needed)", );
                 None
-            },
+            }
         }
     }
 
@@ -1312,7 +1415,7 @@ fn enharmonic_tests() {
     );
 }
 
-use std::ops::{Add, RangeInclusive, DerefMut};
+use std::ops::{Add, DerefMut, RangeInclusive};
 impl Add<Interval> for Note {
     type Output = Option<Note>;
     fn add(self, interval: Interval) -> Option<Note> {
@@ -1403,18 +1506,29 @@ impl Interval {
 #[cfg(test)]
 #[test]
 fn interval_tests() {
-    use Letter::*;
     use Accidental::*;
-    let test_interval = Interval{interval: 1, quality: IntervalQuality::Perfect};
+    use Letter::*;
+    let test_interval = Interval {
+        interval: 1,
+        quality: IntervalQuality::Perfect,
+    };
     for letter in [A, B, C, D, E, F, G] {
-        for octave in 0..=8{
-            let note = Note{ letter, octave, accidental: None};
+        for octave in 0..=8 {
+            let note = Note {
+                letter,
+                octave,
+                accidental: None,
+            };
             println!("{note:?}");
-            assert_eq!(note.midi(), (note+ test_interval).unwrap().midi());
-            for accidental in [DoubleFlat, DoubleSharp, Flat, Sharp, Natural]{
-                let note = Note{ letter, octave, accidental: Some(accidental) };
+            assert_eq!(note.midi(), (note + test_interval).unwrap().midi());
+            for accidental in [DoubleFlat, DoubleSharp, Flat, Sharp, Natural] {
+                let note = Note {
+                    letter,
+                    octave,
+                    accidental: Some(accidental),
+                };
                 println!("{note:?}");
-                assert_eq!(note.midi(), (note+ test_interval).unwrap().midi());
+                assert_eq!(note.midi(), (note + test_interval).unwrap().midi());
             }
         }
     }
